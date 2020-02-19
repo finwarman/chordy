@@ -52,15 +52,32 @@ def u(s):
 def printChord(chord, name, suffix):
     max_fret = max(max(chord['frets']),4)
     frets = chord['frets']
-    fingers = chord['frets']
+    fingers = chord['fingers']
+
+    capo = chord.get('capo', False)
+    basefret = chord.get('baseFret', 1) - 1
+    barres = chord.get('barres', [])
+    # print(capo)
+    # print(basefret)
+    # print(barres)
+    # TODO - Use real barre/basefret info for drawing barre
 
     header =  '{0}E{0}A{0}D{0}G{0}B{0}E{0}'.format(' ')
 
-    width = 18
+    width = 21
 
     print()
     print('{}'.format(header).center(width))
-    print(f('  ╷'), end='')
+
+    if capo:
+        print(f('    ╷ ╷ ╷ ╷ ╷ ╷ ╷'))
+
+    p = '╷'
+    if capo:
+        print(f('cap.|'), end='')
+        p = '|'
+    else:
+        print(f('    ╷'), end='')
 
     for i in range(6):
         s = f('‗')
@@ -68,7 +85,7 @@ def printChord(chord, name, suffix):
             s = f('x')
         elif frets[i] == 0:
             s = '‗'
-        print(s + f('╷'), end='')
+        print(s + f(p), end='')
     print()
 
     for fret in range(1, max_fret + 2):
@@ -97,7 +114,7 @@ def printChord(chord, name, suffix):
             barre_end = (len(row) - 1 - row[::-1].index('\0331'))
             row = row[:barre_start] + row[barre_start:barre_end].replace(sep, b('-')) + row[barre_end:]
 
-        print('{0} {1}'.format(fret, row))
+        print('{0: 3} {1}'.format(fret + basefret, row))
 
     print()
     print(('{0}{1}'.format(name,suffix)).center(width))
@@ -161,4 +178,9 @@ if suffix not in suffixes:
     quit()
 
 chord = getChordInfo(data, key, suffix)
-printChord(chord['positions'][0], chord['key'], chord['suffix'])
+
+print()
+for i in range(len(chord['positions'])):
+    position = chord['positions'][i]
+    print("Position {}:".format(i+1))
+    printChord(position, chord['key'], chord['suffix'])

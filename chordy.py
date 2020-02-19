@@ -1,0 +1,164 @@
+#! /usr/bin/env python3
+
+# Fin Warman, Initial release: 19-02-2020
+# Chords data credit: github.com/tombatossals/chords-db/blob/master/lib/guitar.json
+
+# TODO:
+# - Add views for multiple voicings (not just first)
+# - Add handling for capos
+# - Truncate start of fretboard for higher-up fingerings
+# - Add handling for alt tunings (?)
+
+import json
+import sys
+import re
+from typing import List
+
+def loadChordsData():
+    chords = None
+    with open('guitar.json') as chords_file:
+        chords = json.load(chords_file)
+    return chords
+
+def getSuffixIndex(data, key, suffix):
+    index = -1
+    for ch in data['chords'][key]:
+        index += 1
+        if suffix == ch['suffix']:
+            return index
+    print('Could not find suffix {} for key {}'.format(suffix, key.replace('sharp', '#')))
+    quit()
+
+
+def getChordInfo(data, key, suffix='major'):
+    key = key.replace('#','sharp')
+    suffix_index = getSuffixIndex(data, key, suffix)
+    chord_info = data['chords'][key][suffix_index]
+    return chord_info
+
+# make text bold
+def b(s):
+    return "\033[1m{}\033[0m".format(s)
+
+# make text faint
+def f(s):
+    return "\033[2m{}\033[0m".format(s)
+
+# underline text
+def u(s):
+    return "\033[4m{}\033[0m".format(s)
+
+
+def printChord(chord, name, suffix):
+    max_fret = max(max(chord['frets']),4)
+    frets = chord['frets']
+    fingers = chord['frets']
+
+    header =  '{0}E{0}A{0}D{0}G{0}B{0}E{0}'.format(' ')
+
+    width = 18
+
+    print()
+    print('{}'.format(header).center(width))
+    print(f('  ╷'), end='')
+
+    for i in range(6):
+        s = f('‗')
+        if frets[i] == -1:
+            s = f('x')
+        elif frets[i] == 0:
+            s = '‗'
+        print(s + f('╷'), end='')
+    print()
+
+    for fret in range(1, max_fret + 2):
+        sep = f('_') if fret in [3, 5, 7, 9, 12, 15, 17, 19] else ' '
+        div = f('|')
+
+        row = div
+
+
+        row_fingers = [] # track fingers used for this fret
+        barre_start = 6
+        barre_end = 0
+
+        for string in range(len(frets)):
+            if(frets[string] == fret):
+                finger = str(fingers[string])
+                row += b(finger)
+                row_fingers.append(finger)
+            else:
+                row += sep
+            row += div
+
+        # add barre markings if all fingers are the same
+        if set(row_fingers) == {'1'}:
+            barre_start = row.index('1\033')
+            barre_end = (len(row) - 1 - row[::-1].index('\0331'))
+            row = row[:barre_start] + row[barre_start:barre_end].replace(sep, b('-')) + row[barre_end:]
+
+        print('{0} {1}'.format(fret, row))
+
+    print()
+    print(('{0}{1}'.format(name,suffix)).center(width))
+    print()
+
+def printColumns(lst: List[str], cols=5):
+    widest_length = len(max(lst, key=len))
+
+    row_count = 0
+    for i in lst:
+        print(i.ljust(widest_length + 1), end='')
+        row_count += 1
+        if row_count % cols == 0:
+           print()
+    print('')
+
+def showValidInputs(keys, suffixes):
+    if(keys):
+        print('Available keys:\n')
+        printColumns(keys, 12)
+
+    if(suffixes):
+        print('Available suffixes:\n')
+        printColumns(suffixes, 6)
+
+data = loadChordsData()
+
+keys = data['keys']
+suffixes = data['suffixes']
+
+if len(sys.argv) < 2:
+    print("\nNo chord specified\n")
+    showValidInputs(keys, suffixes)
+    print()
+    quit()
+
+target_chord = sys.argv[-1]
+
+p = re.compile('^([A-G][b#]?)')
+s = p.search(target_chord)
+if not s:
+    print("\n'{}' is not a valid chord\n".format(target_chord))
+    showValidInputs(keys, suffixes)
+    print()
+    quit()
+
+key = s.group(1)
+suffix = target_chord.replace(key, '', 1)
+
+if(len(suffix)==0):
+    suffix = 'major'
+elif(suffix == 'maj'):
+    suffix = 'major'
+elif(suffix == 'min' or suffix == 'm'):
+    suffix = 'minor'
+
+if suffix not in suffixes:
+    print("\n'{}' is not a valid suffix\n".format(suffix))
+    showValidInputs(None, suffixes)
+    print()
+    quit()
+
+chord = getChordInfo(data, key, suffix)
+printChord(chord['positions'][0], chord['key'], chord['suffix'])

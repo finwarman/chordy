@@ -74,7 +74,7 @@ def printChord(chord, name, suffix):
 
     p = '╷'
     if capo:
-        print(f('cap.|'), end='')
+        print(f('bar.|'), end='')
         p = '|'
     else:
         print(f('    ╷'), end='')
@@ -116,7 +116,7 @@ def printChord(chord, name, suffix):
 
         print('{0: 3} {1}'.format(fret + basefret, row))
 
-    print()
+    print(f('    ╵ ╵ ╵ ╵ ╵ ╵ ╵'))
     print(('{0}{1}'.format(name,suffix)).center(width))
     print()
 

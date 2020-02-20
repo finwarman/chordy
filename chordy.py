@@ -10,17 +10,21 @@
 # - Truncate start of fretboard for higher-up fingerings
 # - Add handling for alt tunings (?)
 
+import argparse
 import json
 import sys
 import re
 from typing import List
-
-import argparse
+import os
 
 
 def loadChordsData():
     chords = None
-    with open('guitar.json') as chords_file:
+
+    dirname = os.path.dirname(__file__)
+    filename = os.path.join(dirname, 'guitar.json')
+
+    with open(filename) as chords_file:
         chords = json.load(chords_file)
     return chords
 

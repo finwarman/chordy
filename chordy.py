@@ -4,6 +4,7 @@
 # Chords data credit: github.com/tombatossals/chords-db/blob/master/lib/guitar.json
 
 # TODO:
+# - Use argparse for cli arg, and additional flags (e.g. -v for voicings, etc.)
 # - Add views for multiple voicings (not just first)
 # - Add handling for capos
 # - Truncate start of fretboard for higher-up fingerings
@@ -14,11 +15,15 @@ import sys
 import re
 from typing import List
 
+import argparse
+
+
 def loadChordsData():
     chords = None
     with open('guitar.json') as chords_file:
         chords = json.load(chords_file)
     return chords
+
 
 def getSuffixIndex(data, key, suffix):
     index = -1
@@ -26,31 +31,38 @@ def getSuffixIndex(data, key, suffix):
         index += 1
         if suffix == ch['suffix']:
             return index
-    print('Could not find suffix {} for key {}'.format(suffix, key.replace('sharp', '#')))
+    print('Could not find suffix {} for key {}'.format(
+        suffix, key.replace('sharp', '#')))
     quit()
 
 
 def getChordInfo(data, key, suffix='major'):
-    key = key.replace('#','sharp')
+    key = key.replace('#', 'sharp')
     suffix_index = getSuffixIndex(data, key, suffix)
     chord_info = data['chords'][key][suffix_index]
     return chord_info
 
 # make text bold
+
+
 def b(s):
     return "\033[1m{}\033[0m".format(s)
 
 # make text faint
+
+
 def f(s):
     return "\033[2m{}\033[0m".format(s)
 
 # underline text
+
+
 def u(s):
     return "\033[4m{}\033[0m".format(s)
 
 
 def printChord(chord, name, suffix):
-    max_fret = max(max(chord['frets']),4)
+    max_fret = max(max(chord['frets']), 4)
     frets = chord['frets']
     fingers = chord['fingers']
 
@@ -62,7 +74,7 @@ def printChord(chord, name, suffix):
     # print(barres)
     # TODO - Use real barre/basefret info for drawing barre
 
-    header =  '{0}E{0}A{0}D{0}G{0}B{0}E{0}'.format(' ')
+    header = '{0}E{0}A{0}D{0}G{0}B{0}E{0}'.format(' ')
 
     width = 21
 
@@ -94,8 +106,7 @@ def printChord(chord, name, suffix):
 
         row = div
 
-
-        row_fingers = [] # track fingers used for this fret
+        row_fingers = []  # track fingers used for this fret
         barre_start = 6
         barre_end = 0
 
@@ -112,13 +123,16 @@ def printChord(chord, name, suffix):
         if set(row_fingers) == {'1'}:
             barre_start = row.index('1\033')
             barre_end = (len(row) - 1 - row[::-1].index('\0331'))
-            row = row[:barre_start] + row[barre_start:barre_end].replace(sep, b('-')) + row[barre_end:]
+            row = row[:barre_start] + \
+                row[barre_start:barre_end].replace(
+                    sep, b('-')) + row[barre_end:]
 
         print('{0: 3} {1}'.format(fret + basefret, row))
 
     print(f('    ╵ ╵ ╵ ╵ ╵ ╵ ╵'))
-    print(('{0}{1}'.format(name,suffix)).center(width))
+    print(('{0}{1}'.format(name, suffix)).center(width))
     print()
+
 
 def printColumns(lst: List[str], cols=5):
     widest_length = len(max(lst, key=len))
@@ -128,8 +142,9 @@ def printColumns(lst: List[str], cols=5):
         print(i.ljust(widest_length + 1), end='')
         row_count += 1
         if row_count % cols == 0:
-           print()
+            print()
     print('')
+
 
 def showValidInputs(keys, suffixes):
     if(keys):
@@ -140,18 +155,27 @@ def showValidInputs(keys, suffixes):
         print('Available suffixes:\n')
         printColumns(suffixes, 6)
 
+
 data = loadChordsData()
 
 keys = data['keys']
 suffixes = data['suffixes']
 
-if len(sys.argv) < 2:
+parser = argparse.ArgumentParser(
+    description='Chordy: Find voicings for guitar chords.')
+
+parser.add_argument('target_chord', nargs='?', action='store')
+parser.add_argument('-a', '--all-voicings',
+                    dest='all', action='store_true')
+
+args = parser.parse_args()
+if args.target_chord is None:
     print("\nNo chord specified\n")
     showValidInputs(keys, suffixes)
-    print()
+    print("\nUse -h flag for more help.\n")
     quit()
 
-target_chord = sys.argv[-1]
+target_chord = args.target_chord
 
 p = re.compile('^([A-G][b#]?)')
 s = p.search(target_chord)
@@ -164,7 +188,7 @@ if not s:
 key = s.group(1)
 suffix = target_chord.replace(key, '', 1)
 
-if(len(suffix)==0):
+if(len(suffix) == 0):
     suffix = 'major'
 elif(suffix == 'maj'):
     suffix = 'major'
@@ -180,7 +204,13 @@ if suffix not in suffixes:
 chord = getChordInfo(data, key, suffix)
 
 print()
-for i in range(len(chord['positions'])):
-    position = chord['positions'][i]
-    print("Position {}:".format(i+1))
+if(args.all):
+    for i in range(len(chord['positions'])):
+        position = chord['positions'][i]
+        print("Position {}:".format(i+1))
+        printChord(position, chord['key'], chord['suffix'])
+else:
+    position = chord['positions'][0]
+    print("Showning position {}:".format(1))
     printChord(position, chord['key'], chord['suffix'])
+    print('Use flag -a to show more positions.\n')

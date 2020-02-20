@@ -85,7 +85,7 @@ def printChord(chord, name, suffix):
     print()
     print('{}'.format(header).center(width))
 
-    if capo:
+    if capo and basefret > 1:
         print(f('    ╷ ╷ ╷ ╷ ╷ ╷ ╷'))
 
     p = '╷'

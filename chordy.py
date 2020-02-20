@@ -192,6 +192,12 @@ if not s:
 key = s.group(1)
 suffix = target_chord.replace(key, '', 1)
 
+if key not in data['chords']:
+    print("\n'{}' is not a valid key\n".format(target_chord))
+    showValidInputs(keys, None)
+    print()
+    quit()
+
 if(len(suffix) == 0):
     suffix = 'major'
 elif(suffix == 'maj'):
@@ -202,7 +208,6 @@ elif(suffix == 'min' or suffix == 'm'):
 if suffix not in suffixes:
     print("\n'{}' is not a valid suffix\n".format(suffix))
     showValidInputs(None, suffixes)
-    print()
     quit()
 
 chord = getChordInfo(data, key, suffix)

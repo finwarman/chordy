@@ -215,6 +215,6 @@ if(args.all):
         printChord(position, chord['key'], chord['suffix'])
 else:
     position = chord['positions'][0]
-    print("Showning position {}:".format(1))
+    print("Showing position {0} of {1}:".format(1, len(chord['positions'])))
     printChord(position, chord['key'], chord['suffix'])
     print('Use flag -a to show more positions.\n')

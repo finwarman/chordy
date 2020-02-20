@@ -3,7 +3,7 @@ A command-line guitar chord finder, written in Python
 
 ### Installation
 To call _Chordy_ from anywhere, add an alias to your **~/.bash_profile**:
-`alias chordy='python3 /[YOUR PATH TO]/chordy/chordy.py; source ~/.bash_profile'`
+`echo "alias chordy='python3 /[YOUR PATH TO]/chordy/chordy.py" >> ~/.bash_profile; source ~/.bash_profile'`
 
 ### Usage
 

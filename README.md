@@ -1,5 +1,6 @@
 # chordy
-A command-line guitar chord finder, written in Python
+A command-line guitar chord finder, written in Python  
+[chordy.finwarman.com](https://chordy.finwarman.com/)
 
 ### Installation
 To call _Chordy_ from anywhere, add an alias to your **~/.bash_profile**:

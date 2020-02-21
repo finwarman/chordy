@@ -192,7 +192,7 @@ if not s:
 key = s.group(1)
 suffix = target_chord.replace(key, '', 1)
 
-if key not in data['chords']:
+if key not in keys:
     print("\n'{}' is not a valid key\n".format(target_chord))
     showValidInputs(keys, None)
     print()

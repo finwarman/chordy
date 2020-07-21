@@ -3,8 +3,8 @@ A command-line guitar chord finder, written in Python
 [chordy.finwarman.com](https://chordy.finwarman.com/)
 
 ### Installation
-To call _Chordy_ from anywhere, add an alias to your **~/.bash_profile**:
-`echo "alias chordy='python3 /[YOUR PATH TO]/chordy/chordy.py" >> ~/.bash_profile; source ~/.bash_profile'`
+To call _Chordy_ from anywhere, add it to `/usr/bin`:  
+`cp chordy.py /usr/bin/chordy; cp guitar.json /usr/bin/`
 
 ### Usage
 
